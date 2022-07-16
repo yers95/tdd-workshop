@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using AutoFixture.Xunit2;
 using Bogus;
 using FsCheck.Xunit;
@@ -15,11 +16,13 @@ namespace TddWorkshop.Domain.Tests;
 
 public class CreditCalculatorTests
 {
-    [Fact(Skip = "Implement on Step 1")]
-    public void Calculate_IsApproved_PointsCalculatedCorrectly()
-    //CalculateCreditRequest request, bool hasCriminalRecord, int points)
+    [Theory, ClassData(typeof(CreditCalculatorTestData))]
+    public void Calculate_IsApproved_PointsCalculatedCorrectly(
+    CalculateCreditRequest request, bool hasCriminalRecord, int expected)
     {
-        throw new NotImplementedException();
+        var response = CreditCalculator.Calculate(request, hasCriminalRecord);
+        Assert.Equal(expected, response.Points);
+
     }
 }
 
@@ -48,11 +51,11 @@ public class CreditCalculatorTestData : IEnumerable<object[]>
     public static CalculateCreditRequest CreateRequest(int age, CreditGoal goal, decimal sum,
         Deposit deposit, Employment employment, bool hasOtherCredits)
     {
-        // var faker = new Faker();
+        var faker = new Faker();
         return new CalculateCreditRequest(
-            new PersonalInfo(age, "", ""),
+            new PersonalInfo(age, faker.Person.FirstName, faker.Person.LastName),
             new CreditInfo(goal, sum, deposit, employment, hasOtherCredits),
-            new PassportInfo("1234", "123456", DateTime.Now, "")
+            new PassportInfo("1234", "123456", faker.Date.Past(2), faker.Company.CompanyName())
         );
     }
 }
